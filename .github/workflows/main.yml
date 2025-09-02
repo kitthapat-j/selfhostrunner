@@ -11,6 +11,7 @@ jobs:
 
     steps:
       - name: Deploy to Kubernetes
+        shell: bash
         run: |
           # สร้างไฟล์ Kubernetes Deployment และ Service
           kubectl apply -f - <<EOF
@@ -51,3 +52,4 @@ jobs:
           kubectl get pods -l app=nodejs-app
           # ตรวจสอบสถานะของ Services
           kubectl get services
+          
