@@ -1,0 +1,53 @@
+name: Deploy to Kubernetes
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: self-hosted  # ใช้ self-hosted runner ที่เราตั้งค่าไว้
+
+    steps:
+      - name: Deploy to Kubernetes
+        run: |
+          # สร้างไฟล์ Kubernetes Deployment และ Service
+          kubectl apply -f - <<EOF
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: eshopweb-deployment
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: eshopweb
+            template:
+              metadata:
+                labels:
+                  app: eshopweb
+              spec:
+                containers:
+                - name: eshopweb
+                  image: training911/eshopweb:latest
+                  ports:
+                  - containerPort: 3000
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: eshopweb-service
+          spec:
+            selector:
+              app: eshopweb
+            ports:
+            - protocol: TCP
+              port: 80
+              targetPort: 3000
+            type: LoadBalancer # ใช้ NodePort แทน LoadBalancer สำหรับ Docker Desktop
+          EOF
+          # ตรวจสอบสถานะของ Pods
+          kubectl get pods -l app=nodejs-app
+          # ตรวจสอบสถานะของ Services
+          kubectl get services
