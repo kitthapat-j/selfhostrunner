@@ -44,7 +44,7 @@ jobs:
             - protocol: TCP
               port: 80
               targetPort: 3000
-            type: NodePort # NodePort เหมาะกับ Docker Desktop
+            type: NodePort
           "@
 
           $yamlContent | Out-File -FilePath deployment.yaml
