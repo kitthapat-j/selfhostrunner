@@ -11,45 +11,42 @@ jobs:
 
     steps:
       - name: Deploy to Kubernetes
-        shell: bash
+        shell: pwsh
         run: |
-          # สร้างไฟล์ Kubernetes Deployment และ Service
-          kubectl apply -f - <<EOF
+          $yamlContent = @"
           apiVersion: apps/v1
           kind: Deployment
           metadata:
-            name: eshopweb-deployment
+            name: nodejs-app-deployment
           spec:
             replicas: 1
             selector:
               matchLabels:
-                app: eshopweb
+                app: nodejs-app
             template:
               metadata:
                 labels:
-                  app: eshopweb
+                  app: nodejs-app
               spec:
                 containers:
-                - name: eshopweb
-                  image: training911/eshopweb:latest
+                - name: nodejs-app
+                  image: <your-dockerhub-username>/nodejs-app:latest
                   ports:
                   - containerPort: 3000
           ---
           apiVersion: v1
           kind: Service
           metadata:
-            name: eshopweb-service
+            name: nodejs-app-service
           spec:
             selector:
-              app: eshopweb
+              app: nodejs-app
             ports:
             - protocol: TCP
               port: 80
               targetPort: 3000
-            type: LoadBalancer # ใช้ NodePort แทน LoadBalancer สำหรับ Docker Desktop
-          EOF
-          # ตรวจสอบสถานะของ Pods
-          kubectl get pods -l app=nodejs-app
-          # ตรวจสอบสถานะของ Services
-          kubectl get services
-          
+            type: NodePort # NodePort เหมาะกับ Docker Desktop
+          "@
+
+          $yamlContent | Out-File -FilePath deployment.yaml
+          kubectl apply -f deployment.yaml
